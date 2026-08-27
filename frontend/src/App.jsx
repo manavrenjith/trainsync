@@ -7,6 +7,7 @@ import WhatIfSimulator from './components/WhatIfSimulator';
 import FleetAnalytics from './components/FleetAnalytics';
 import AuditLogView from './components/AuditLogView';
 import TrainDetailModal from './components/TrainDetailModal';
+import ShuntSequenceModal from './components/ShuntSequenceModal';
 import { API_BASE_URL } from './config';
 
 export default function App() {
@@ -22,7 +23,15 @@ export default function App() {
   const [selectedTrainForTrace, setSelectedTrainForTrace] = useState(null);
   const [selectedTrainForOverride, setSelectedTrainForOverride] = useState(null);
   const [selectedTrainDetailId, setSelectedTrainDetailId] = useState(null);
+  const [selectedTrainForShunt, setSelectedTrainForShunt] = useState(null);
   const [isSubmittingOverride, setIsSubmittingOverride] = useState(false);
+
+  const handleOpenShuntPlan = (trainId, reason) => {
+    setSelectedTrainForTrace(null);
+    setSelectedTrainForOverride(null);
+    setSelectedTrainDetailId(null);
+    setSelectedTrainForShunt({ trainId, reason });
+  };
 
   const updateTimestamp = () => {
     const now = new Date();
@@ -107,9 +116,19 @@ export default function App() {
           <DailyPlanView
             plan={plan}
             loading={loading}
-            onSelectTrainForTrace={setSelectedTrainForTrace}
-            onSelectTrainForOverride={setSelectedTrainForOverride}
-            onSelectTrainDetail={setSelectedTrainDetailId}
+            onSelectTrainForTrace={(train) => {
+              setSelectedTrainForShunt(null);
+              setSelectedTrainForTrace(train);
+            }}
+            onSelectTrainForOverride={(train) => {
+              setSelectedTrainForShunt(null);
+              setSelectedTrainForOverride(train);
+            }}
+            onSelectTrainDetail={(trainId) => {
+              setSelectedTrainForShunt(null);
+              setSelectedTrainDetailId(trainId);
+            }}
+            onOpenShuntPlan={handleOpenShuntPlan}
           />
         )}
 
@@ -133,6 +152,7 @@ export default function App() {
       <ExplanationDrawer
         decision={selectedTrainForTrace}
         onClose={() => setSelectedTrainForTrace(null)}
+        onOpenShuntPlan={handleOpenShuntPlan}
       />
 
       <OverrideModal
@@ -146,6 +166,14 @@ export default function App() {
         trainId={selectedTrainDetailId}
         onClose={() => setSelectedTrainDetailId(null)}
       />
+
+      {selectedTrainForShunt && (
+        <ShuntSequenceModal
+          blockedTrainId={selectedTrainForShunt.trainId}
+          blockedReason={selectedTrainForShunt.reason}
+          onClose={() => setSelectedTrainForShunt(null)}
+        />
+      )}
 
       {/* Minimal Status Footer */}
       <footer className="border-t border-[#E4E7EC] py-4 bg-white text-xs text-[#64748B] font-mono">

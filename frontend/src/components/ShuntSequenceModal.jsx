@@ -10,25 +10,26 @@ export default function ShuntSequenceModal({ blockedTrainId, blockedReason, onCl
   let blockers = [];
   if (blockedReason && blockedReason.includes('blocked by trains:')) {
     const raw = blockedReason.split('blocked by trains:')[1];
-    blockers = raw.split(',').map(s => s.trim());
+    blockers = raw.split(',').map(s => s.trim()).filter(Boolean);
   } else {
-    blockers = ['KMRL-025', 'KMRL-024', 'KMRL-023'];
+    blockers = ['KMRL-023', 'KMRL-024', 'KMRL-025'];
   }
 
-  // Compute shunt sequence: blockers ordered from exit (P3) inward, then target train (P1)
-  // Reversing blockers array so highest position (closest to exit) comes first
+  // Compute shunt sequence: blockers ordered from exit inward to target train (P1)
+  // Reversing blockers array so highest position (closest to exit) comes first for shunting
   const sortedBlockers = [...blockers].reverse();
 
   const steps = [];
   sortedBlockers.forEach((bId, idx) => {
-    const pos = 3 - idx;
-    const dist = (idx + 1) * 15;
+    const origIdx = blockers.indexOf(bId);
+    const pos = origIdx !== -1 ? origIdx + 2 : blockers.length + 1 - idx;
+    const dist = (sortedBlockers.length - idx) * 15;
     steps.push({
       stepNumber: idx + 1,
       trainId: bId,
-      position: `P${Math.max(1, pos)}`,
+      position: `P${pos}`,
       distance: `${dist}m`,
-      action: `Shunt ${bId} out first — located at Position P${Math.max(1, pos)} (${dist}m from turnout exit)`,
+      action: `Shunt ${bId} out first — located at Position P${pos} (${dist}m from turnout exit)`,
       detail: `Move ${bId} to temporary depot siding track S-0${idx + 1} to clear track segment.`
     });
   });
@@ -105,8 +106,9 @@ export default function ShuntSequenceModal({ blockedTrainId, blockedReason, onCl
                   </div>
                 </div>
 
-                {sortedBlockers.map((bId, idx) => {
+                {blockers.map((bId, idx) => {
                   const isActive = activeStep.trainId === bId;
+                  const bayNum = idx + 2;
                   return (
                     <div
                       key={bId}
@@ -116,7 +118,7 @@ export default function ShuntSequenceModal({ blockedTrainId, blockedReason, onCl
                     >
                       <div className="flex items-center justify-center space-x-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#D97706]"></span>
-                        <span>{bId} (P{3 - idx})</span>
+                        <span>{bId} (P{bayNum})</span>
                       </div>
                     </div>
                   );

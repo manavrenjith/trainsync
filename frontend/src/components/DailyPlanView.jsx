@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
 import StablingDiagram from './StablingDiagram';
-import ShuntSequenceModal from './ShuntSequenceModal';
 
 export default function DailyPlanView({
   plan,
   loading,
   onSelectTrainForTrace,
   onSelectTrainForOverride,
-  onSelectTrainDetail
+  onSelectTrainDetail,
+  onOpenShuntPlan
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDecision, setFilterDecision] = useState('ALL');
-  const [shuntModalTrainId, setShuntModalTrainId] = useState(null);
-  const [shuntModalReason, setShuntModalReason] = useState(null);
 
   if (loading) {
     return (
@@ -172,8 +170,7 @@ export default function DailyPlanView({
                         {blockageViolation && (
                           <button
                             onClick={() => {
-                              setShuntModalTrainId(item.train_id);
-                              setShuntModalReason(blockageViolation);
+                              if (onOpenShuntPlan) onOpenShuntPlan(item.train_id, blockageViolation);
                             }}
                             className="text-[#2563EB] hover:underline font-mono text-[11px] font-medium"
                           >
@@ -215,18 +212,6 @@ export default function DailyPlanView({
           </tbody>
         </table>
       </div>
-
-      {/* Shunt Sequence Modal */}
-      {shuntModalTrainId && (
-        <ShuntSequenceModal
-          blockedTrainId={shuntModalTrainId}
-          blockedReason={shuntModalReason}
-          onClose={() => {
-            setShuntModalTrainId(null);
-            setShuntModalReason(null);
-          }}
-        />
-      )}
     </div>
   );
 }

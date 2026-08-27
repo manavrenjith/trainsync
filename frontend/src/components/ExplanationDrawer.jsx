@@ -1,10 +1,6 @@
-import React, { useState } from 'react';
-import ShuntSequenceModal from './ShuntSequenceModal';
+import React from 'react';
 
-export default function ExplanationDrawer({ decision, onClose }) {
-  const [shuntModalTrainId, setShuntModalTrainId] = useState(null);
-  const [shuntModalReason, setShuntModalReason] = useState(null);
-
+export default function ExplanationDrawer({ decision, onClose, onOpenShuntPlan }) {
   if (!decision) return null;
 
   const breakdown = decision.soft_breakdown || {};
@@ -53,8 +49,7 @@ export default function ExplanationDrawer({ decision, onClose }) {
                 {blockageViolation && (
                   <button
                     onClick={() => {
-                      setShuntModalTrainId(decision.train_id);
-                      setShuntModalReason(blockageViolation);
+                      if (onOpenShuntPlan) onOpenShuntPlan(decision.train_id, blockageViolation);
                     }}
                     className="px-2.5 py-1 bg-white hover:bg-[#F7F8FA] text-[#2563EB] border border-[#2563EB]/40 rounded font-mono font-medium text-xs transition"
                   >
@@ -84,8 +79,7 @@ export default function ExplanationDrawer({ decision, onClose }) {
                       {isBlockageTrace && (
                         <button
                           onClick={() => {
-                            setShuntModalTrainId(decision.train_id);
-                            setShuntModalReason(trace);
+                            if (onOpenShuntPlan) onOpenShuntPlan(decision.train_id, trace);
                           }}
                           className="ml-2 px-2 py-0.5 text-[11px] font-mono font-medium text-[#2563EB] hover:underline shrink-0"
                         >
@@ -148,18 +142,6 @@ export default function ExplanationDrawer({ decision, onClose }) {
           </button>
         </div>
       </div>
-
-      {/* Shunt Sequence Modal Triggered On Demand */}
-      {shuntModalTrainId && (
-        <ShuntSequenceModal
-          blockedTrainId={shuntModalTrainId}
-          blockedReason={shuntModalReason}
-          onClose={() => {
-            setShuntModalTrainId(null);
-            setShuntModalReason(null);
-          }}
-        />
-      )}
     </div>
   );
 }
