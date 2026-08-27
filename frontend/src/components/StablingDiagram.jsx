@@ -13,6 +13,7 @@ export default function StablingDiagram({ plan, onSelectTrain }) {
   const tracks = Array.from({ length: 9 }, (_, i) => {
     const trackNum = i + 1;
     const trackName = `TRK-${trackNum.toString().padStart(2, '0')}`;
+    const turnoutDist = (trackNum * 15);
     const trainPositions = [1, 2, 3].map(pos => {
       const trainIndex = (i * 3) + pos;
       if (trainIndex > 25) return null;
@@ -27,7 +28,7 @@ export default function StablingDiagram({ plan, onSelectTrain }) {
       };
     }).filter(Boolean);
 
-    return { trackNum, trackName, trainPositions };
+    return { trackNum, trackName, turnoutDist, trainPositions };
   });
 
   return (
@@ -35,14 +36,14 @@ export default function StablingDiagram({ plan, onSelectTrain }) {
       <div className="flex items-center justify-between border-b border-[#E4E7EC] pb-3">
         <div>
           <h3 className="text-xs font-semibold text-[#0F172A] tracking-tight">
-            Muttom Depot • Stabling Yard Layout & Turnout Paths
+            Muttom Depot • Stabling Yard Layout & Turnout Geometry
           </h3>
           <p className="text-xs text-[#64748B] mt-0.5">
             Sequential stabling geometry & physical turnout blockage indicators.
           </p>
         </div>
 
-        {/* Muted Legend */}
+        {/* Legend */}
         <div className="flex items-center space-x-4 text-xs font-medium text-[#64748B]">
           <div className="flex items-center space-x-1.5">
             <span className="w-2 h-2 rounded-full bg-[#16A34A]"></span>
@@ -95,8 +96,9 @@ export default function StablingDiagram({ plan, onSelectTrain }) {
               })}
             </div>
 
+            {/* Specific Turnout Sequence Telemetry */}
             <div className="text-[10px] font-mono text-[#64748B] shrink-0 pl-1">
-              → Mainline
+              Turnout T-0{trk.trackNum} ({trk.turnoutDist}m)
             </div>
           </div>
         ))}
