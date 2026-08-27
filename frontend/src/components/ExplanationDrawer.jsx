@@ -1,12 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
+import ShuntSequenceModal from './ShuntSequenceModal';
 
 export default function ExplanationDrawer({ decision, onClose }) {
+  const [shuntModalTrainId, setShuntModalTrainId] = useState(null);
+  const [shuntModalReason, setShuntModalReason] = useState(null);
+
   if (!decision) return null;
 
   const breakdown = decision.soft_breakdown || {};
   const isInduct = decision.decision === 'INDUCT';
   const isStandby = decision.decision === 'STANDBY';
   const dotColor = isInduct ? 'bg-[#16A34A]' : isStandby ? 'bg-[#D97706]' : 'bg-[#DC2626]';
+
+  // Find if there is a stabling blockage violation
+  const blockageViolation = decision.hard_violations && decision.hard_violations.find(v => v.toLowerCase().includes('blocked'));
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 flex justify-end font-sans">
@@ -37,9 +44,25 @@ export default function ExplanationDrawer({ decision, onClose }) {
                 ? 'bg-[#F7F8FA] border-[#16A34A]/30 text-[#16A34A]'
                 : 'bg-[#F7F8FA] border-[#DC2626]/30 text-[#DC2626]'
             }`}>
-              <div className="font-semibold">
-                {decision.is_eligible ? 'Pass: All Hard Constraints Satisfied' : 'Fail: Hard Constraint Violation Detected'}
+              <div className="flex items-center justify-between">
+                <div className="font-semibold">
+                  {decision.is_eligible ? 'Pass: All Hard Constraints Satisfied' : 'Fail: Hard Constraint Violation Detected'}
+                </div>
+
+                {/* Specific "View shunt plan" trigger if stabling blockage */}
+                {blockageViolation && (
+                  <button
+                    onClick={() => {
+                      setShuntModalTrainId(decision.train_id);
+                      setShuntModalReason(blockageViolation);
+                    }}
+                    className="px-2.5 py-1 bg-white hover:bg-[#F7F8FA] text-[#2563EB] border border-[#2563EB]/40 rounded font-mono font-medium text-xs transition"
+                  >
+                    View shunt plan →
+                  </button>
+                )}
               </div>
+
               <p className="text-[#64748B] mt-1">
                 {decision.is_eligible
                   ? 'Department fitness certificates valid. Zero open critical work orders.'
@@ -53,11 +76,25 @@ export default function ExplanationDrawer({ decision, onClose }) {
                 Logic & Reason Trace
               </h3>
               <div className="bg-[#F7F8FA] border border-[#E4E7EC] rounded p-4 space-y-2 text-xs text-[#0F172A]">
-                {decision.reason_trace && decision.reason_trace.map((trace, idx) => (
-                  <p key={idx} className="py-1 border-b border-[#E4E7EC] last:border-0">
-                    {trace}
-                  </p>
-                ))}
+                {decision.reason_trace && decision.reason_trace.map((trace, idx) => {
+                  const isBlockageTrace = trace.toLowerCase().includes('blocked');
+                  return (
+                    <div key={idx} className="py-1 border-b border-[#E4E7EC] last:border-0 flex items-center justify-between">
+                      <span>{trace}</span>
+                      {isBlockageTrace && (
+                        <button
+                          onClick={() => {
+                            setShuntModalTrainId(decision.train_id);
+                            setShuntModalReason(trace);
+                          }}
+                          className="ml-2 px-2 py-0.5 text-[11px] font-mono font-medium text-[#2563EB] hover:underline shrink-0"
+                        >
+                          View shunt plan →
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -111,6 +148,18 @@ export default function ExplanationDrawer({ decision, onClose }) {
           </button>
         </div>
       </div>
+
+      {/* Shunt Sequence Modal Triggered On Demand */}
+      {shuntModalTrainId && (
+        <ShuntSequenceModal
+          blockedTrainId={shuntModalTrainId}
+          blockedReason={shuntModalReason}
+          onClose={() => {
+            setShuntModalTrainId(null);
+            setShuntModalReason(null);
+          }}
+        />
+      )}
     </div>
   );
 }

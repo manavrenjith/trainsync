@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import StablingDiagram from './StablingDiagram';
+import ShuntSequenceModal from './ShuntSequenceModal';
 
 export default function DailyPlanView({
   plan,
@@ -10,6 +11,8 @@ export default function DailyPlanView({
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDecision, setFilterDecision] = useState('ALL');
+  const [shuntModalTrainId, setShuntModalTrainId] = useState(null);
+  const [shuntModalReason, setShuntModalReason] = useState(null);
 
   if (loading) {
     return (
@@ -130,6 +133,7 @@ export default function DailyPlanView({
               const isOverridden = !!item.override_of;
 
               const dotColor = isInduct ? 'bg-[#16A34A]' : isStandby ? 'bg-[#D97706]' : 'bg-[#DC2626]';
+              const blockageViolation = item.hard_violations && item.hard_violations.find(v => v.toLowerCase().includes('blocked'));
 
               return (
                 <tr key={item.train_id} className="hover:bg-[#F7F8FA]/60 transition">
@@ -154,14 +158,29 @@ export default function DailyPlanView({
                     {isInduct ? 'Induct' : isStandby ? 'Standby' : 'IBL'}
                   </td>
 
-                  {/* Hard Compliance (Eligible in muted gray, or Ineligible in red) */}
+                  {/* Hard Compliance */}
                   <td className="py-3.5 px-4">
                     {item.is_eligible ? (
                       <span className="text-[#64748B] font-medium">Eligible</span>
                     ) : (
-                      <span className="text-[#DC2626] font-medium">
-                        {item.hard_violations[0] || 'Ineligible'}
-                      </span>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-[#DC2626] font-medium">
+                          {item.hard_violations[0] || 'Ineligible'}
+                        </span>
+
+                        {/* Actionable View Shunt Plan button ONLY for stabling blockage */}
+                        {blockageViolation && (
+                          <button
+                            onClick={() => {
+                              setShuntModalTrainId(item.train_id);
+                              setShuntModalReason(blockageViolation);
+                            }}
+                            className="text-[#2563EB] hover:underline font-mono text-[11px] font-medium"
+                          >
+                            View shunt plan →
+                          </button>
+                        )}
+                      </div>
                     )}
                   </td>
 
@@ -196,6 +215,18 @@ export default function DailyPlanView({
           </tbody>
         </table>
       </div>
+
+      {/* Shunt Sequence Modal */}
+      {shuntModalTrainId && (
+        <ShuntSequenceModal
+          blockedTrainId={shuntModalTrainId}
+          blockedReason={shuntModalReason}
+          onClose={() => {
+            setShuntModalTrainId(null);
+            setShuntModalReason(null);
+          }}
+        />
+      )}
     </div>
   );
 }
