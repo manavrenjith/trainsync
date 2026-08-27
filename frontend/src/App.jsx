@@ -16,12 +16,24 @@ export default function App() {
   const [trains, setTrains] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [lastRunTimestamp, setLastRunTimestamp] = useState('2026-08-27 09:38:00');
 
   // Modals & Drawers state
   const [selectedTrainForTrace, setSelectedTrainForTrace] = useState(null);
   const [selectedTrainForOverride, setSelectedTrainForOverride] = useState(null);
   const [selectedTrainDetailId, setSelectedTrainDetailId] = useState(null);
   const [isSubmittingOverride, setIsSubmittingOverride] = useState(false);
+
+  const updateTimestamp = () => {
+    const now = new Date();
+    const formatted = now.getFullYear() + '-' +
+      String(now.getMonth() + 1).padStart(2, '0') + '-' +
+      String(now.getDate()).padStart(2, '0') + ' ' +
+      String(now.getHours()).padStart(2, '0') + ':' +
+      String(now.getMinutes()).padStart(2, '0') + ':' +
+      String(now.getSeconds()).padStart(2, '0');
+    setLastRunTimestamp(formatted);
+  };
 
   const fetchPlan = async (dateStr) => {
     setLoading(true);
@@ -34,6 +46,7 @@ export default function App() {
       const tData = await tRes.json();
       setPlan(pData);
       setTrains(tData);
+      updateTimestamp();
     } catch (err) {
       console.error("Failed to fetch plan:", err);
     } finally {
@@ -51,6 +64,7 @@ export default function App() {
       const res = await fetch(`${API_BASE_URL}/api/plan/${selectedDate}/generate`, { method: 'POST' });
       const data = await res.json();
       setPlan(data);
+      updateTimestamp();
     } catch (err) {
       console.error("Regeneration failed:", err);
     } finally {
@@ -78,7 +92,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-white text-[#0F172A] flex flex-col font-sans">
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -133,11 +147,11 @@ export default function App() {
         onClose={() => setSelectedTrainDetailId(null)}
       />
 
-      {/* Footer */}
-      <footer className="border-t border-slate-800/80 py-6 bg-slate-950/80 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
-          <p>© 2026 Kochi Metro Rail Limited (KMRL) • AI-Driven Fleet Induction & Stabling Optimization</p>
-          <p className="font-mono text-cyan-500">SIH PS #80 Solution</p>
+      {/* Minimal Status Footer */}
+      <footer className="border-t border-[#E4E7EC] py-4 bg-white text-xs text-[#64748B] font-mono">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+          <span>TrainSync — Fleet Induction Engine · v1.0</span>
+          <span>Engine last run: {lastRunTimestamp}</span>
         </div>
       </footer>
     </div>

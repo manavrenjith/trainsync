@@ -154,13 +154,13 @@ export default function DailyPlanView({
                     {isInduct ? 'Induct' : isStandby ? 'Standby' : 'IBL'}
                   </td>
 
-                  {/* Hard Compliance */}
+                  {/* Hard Compliance (Eligible in muted gray, or Ineligible in red) */}
                   <td className="py-3.5 px-4">
                     {item.is_eligible ? (
-                      <span className="text-[#16A34A] font-medium">Pass</span>
+                      <span className="text-[#64748B] font-medium">Eligible</span>
                     ) : (
                       <span className="text-[#DC2626] font-medium">
-                        {item.hard_violations[0] || 'Hard Fail'}
+                        {item.hard_violations[0] || 'Ineligible'}
                       </span>
                     )}
                   </td>
