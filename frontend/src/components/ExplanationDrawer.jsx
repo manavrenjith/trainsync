@@ -1,64 +1,60 @@
 import React from 'react';
-import { X, Wrench } from 'lucide-react';
 
 export default function ExplanationDrawer({ decision, onClose }) {
   if (!decision) return null;
 
   const breakdown = decision.soft_breakdown || {};
+  const isInduct = decision.decision === 'INDUCT';
+  const isStandby = decision.decision === 'STANDBY';
+  const dotColor = isInduct ? 'bg-[#16A34A]' : isStandby ? 'bg-[#D97706]' : 'bg-[#DC2626]';
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-black/75 flex justify-end font-sans">
-      <div className="w-full max-w-xl bg-[#141B22] border-l border-[#28323E] h-full overflow-y-auto flex flex-col justify-between">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 flex justify-end font-sans">
+      <div className="w-full max-w-xl bg-white border-l border-[#E4E7EC] h-full overflow-y-auto flex flex-col justify-between">
         <div>
-          {/* Drawer Header */}
-          <div className="p-5 border-b border-[#28323E] flex items-center justify-between sticky top-0 bg-[#141B22] z-10">
+          {/* Header */}
+          <div className="p-5 border-b border-[#E4E7EC] flex items-center justify-between sticky top-0 bg-white z-10">
             <div>
-              <div className="flex items-center space-x-3">
-                <h2 className="font-display text-lg font-bold text-[#E8E6DF]">{decision.train_id}</h2>
-                <div className="flex items-center space-x-1.5 font-mono text-xs">
-                  <span className={`w-2.5 h-2.5 rounded-full ${
-                    decision.decision === 'INDUCT' ? 'bg-[#3FA34D]' : decision.decision === 'STANDBY' ? 'bg-[#E0A526]' : 'bg-[#C4433A]'
-                  }`}></span>
-                  <span className={decision.decision === 'INDUCT' ? 'text-[#3FA34D]' : decision.decision === 'STANDBY' ? 'text-[#E0A526]' : 'text-[#C4433A]'}>
-                    {decision.decision}
-                  </span>
-                </div>
+              <div className="flex items-center space-x-2">
+                <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${dotColor}`}></span>
+                <h2 className="font-mono text-base font-bold text-[#0F172A]">{decision.train_id}</h2>
+                <span className="text-xs font-medium text-[#64748B]">({decision.decision})</span>
               </div>
-              <p className="text-xs font-mono text-[#9E9E96] mt-0.5">Decision Explanation & Constraint Audit Trace</p>
+              <p className="text-xs text-[#64748B] mt-0.5">Decision Explanation & Audit Trace</p>
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded text-[#9E9E96] hover:text-[#E8E6DF] hover:bg-[#0C1116] font-mono text-xs border border-[#28323E]"
+              className="p-1 text-[#64748B] hover:text-[#0F172A] text-xs font-mono"
             >
-              [ESC]
+              [Close]
             </button>
           </div>
 
           <div className="p-6 space-y-6">
             {/* Status Banner */}
-            <div className={`p-4 rounded border font-mono text-xs ${
+            <div className={`p-4 rounded border text-xs ${
               decision.is_eligible
-                ? 'bg-[#121E15] border-[#3FA34D]/50 text-[#3FA34D]'
-                : 'bg-[#1C1214] border-[#C4433A]/50 text-[#C4433A]'
+                ? 'bg-[#F7F8FA] border-[#16A34A]/30 text-[#16A34A]'
+                : 'bg-[#F7F8FA] border-[#DC2626]/30 text-[#DC2626]'
             }`}>
-              <div className="font-bold">
-                {decision.is_eligible ? 'PASS: All Hard Constraints Satisfied' : 'FAIL: Hard Constraint Violation Detected'}
+              <div className="font-semibold">
+                {decision.is_eligible ? 'Pass: All Hard Constraints Satisfied' : 'Fail: Hard Constraint Violation Detected'}
               </div>
-              <p className="text-[#E8E6DF]/80 mt-1 font-sans">
+              <p className="text-[#64748B] mt-1">
                 {decision.is_eligible
-                  ? 'Department certificates valid. Zero open critical work orders.'
+                  ? 'Department fitness certificates valid. Zero open critical work orders.'
                   : `${decision.hard_violations.length} critical constraint failure(s) prevent revenue induction.`}
               </p>
             </div>
 
-            {/* Decision Trace List */}
+            {/* Trace List */}
             <div className="space-y-2">
-              <h3 className="font-display text-xs font-bold uppercase text-[#5B8FB0] tracking-wider">
+              <h3 className="text-xs font-semibold text-[#0F172A] uppercase">
                 Logic & Reason Trace
               </h3>
-              <div className="bg-[#0C1116] border border-[#28323E] rounded p-4 space-y-2 font-mono text-xs text-[#E8E6DF]">
+              <div className="bg-[#F7F8FA] border border-[#E4E7EC] rounded p-4 space-y-2 text-xs text-[#0F172A]">
                 {decision.reason_trace && decision.reason_trace.map((trace, idx) => (
-                  <p key={idx} className="py-1 border-b border-[#28323E]/50 last:border-0">
+                  <p key={idx} className="py-1 border-b border-[#E4E7EC] last:border-0">
                     {trace}
                   </p>
                 ))}
@@ -68,11 +64,11 @@ export default function ExplanationDrawer({ decision, onClose }) {
             {/* Sub-score breakdown */}
             {decision.is_eligible && (
               <div className="space-y-3">
-                <h3 className="font-display text-xs font-bold uppercase text-[#5B8FB0] tracking-wider">
-                  Sub-Score Multi-Objective Factor Weighting
+                <h3 className="text-xs font-semibold text-[#0F172A] uppercase">
+                  Multi-Objective Sub-Scores
                 </h3>
 
-                <div className="bg-[#0C1116] border border-[#28323E] rounded p-4 space-y-3">
+                <div className="bg-[#F7F8FA] border border-[#E4E7EC] rounded p-4 space-y-3">
                   {[
                     { label: 'Branding SLA Urgency (35%)', val: breakdown.branding_urgency_score },
                     { label: 'Fleet Mileage Balance (30%)', val: breakdown.mileage_balance_score },
@@ -80,23 +76,23 @@ export default function ExplanationDrawer({ decision, onClose }) {
                     { label: 'Cleaning Slot Readiness (10%)', val: breakdown.cleaning_readiness_score },
                     { label: 'Stabling Track Ease (10%)', val: breakdown.stabling_ease_score }
                   ].map((sub, idx) => (
-                    <div key={idx} className="space-y-1 font-mono text-xs">
-                      <div className="flex justify-between text-[#9E9E96]">
+                    <div key={idx} className="space-y-1 text-xs">
+                      <div className="flex justify-between text-[#64748B]">
                         <span>{sub.label}</span>
-                        <span className="font-bold text-[#E8E6DF]">{((sub.val || 0) * 100).toFixed(0)}%</span>
+                        <span className="font-mono font-medium text-[#0F172A]">{((sub.val || 0) * 100).toFixed(0)}%</span>
                       </div>
-                      <div className="w-full bg-[#141B22] rounded-sm h-1.5 overflow-hidden border border-[#28323E]">
+                      <div className="w-full bg-white rounded-full h-1.5 overflow-hidden border border-[#E4E7EC]">
                         <div
-                          className="h-full bg-[#5B8FB0]"
+                          className="h-full bg-[#2563EB]"
                           style={{ width: `${Math.min(100, (sub.val || 0) * 100)}%` }}
                         ></div>
                       </div>
                     </div>
                   ))}
 
-                  <div className="pt-3 border-t border-[#28323E] flex items-center justify-between font-mono">
-                    <span className="text-xs font-bold text-[#E8E6DF]">Composite Priority Score</span>
-                    <span className="text-base font-bold text-[#5B8FB0]">
+                  <div className="pt-3 border-t border-[#E4E7EC] flex items-center justify-between text-xs font-medium">
+                    <span className="text-[#0F172A]">Composite Score</span>
+                    <span className="text-sm font-bold font-mono text-[#2563EB]">
                       {((decision.score || 0) * 100).toFixed(1)}%
                     </span>
                   </div>
@@ -106,12 +102,12 @@ export default function ExplanationDrawer({ decision, onClose }) {
           </div>
         </div>
 
-        <div className="p-4 border-t border-[#28323E] bg-[#141B22]">
+        <div className="p-4 border-t border-[#E4E7EC] bg-white">
           <button
             onClick={onClose}
-            className="w-full bg-[#0C1116] hover:bg-[#1C242D] text-[#E8E6DF] font-mono text-xs font-bold py-2.5 rounded border border-[#28323E] transition"
+            className="w-full bg-[#F7F8FA] hover:bg-[#E4E7EC] text-[#0F172A] text-xs font-medium py-2 rounded border border-[#E4E7EC] transition"
           >
-            Close Trace Window
+            Close Trace
           </button>
         </div>
       </div>

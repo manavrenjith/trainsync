@@ -2,63 +2,58 @@ import React from 'react';
 
 export default function Navbar({ activeTab, setActiveTab, selectedDate, setSelectedDate, onRegenerate, isRegenerating }) {
   return (
-    <header className="bg-[#141B22] border-b border-[#28323E] sticky top-0 z-40">
+    <header className="bg-white border-b border-[#E4E7EC] sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
-          {/* Logo & Operational Dispatch Header */}
-          <div className="flex items-center space-x-4">
+          {/* Logo & Subtitle */}
+          <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
-              <span className="w-3 h-3 bg-[#5B8FB0] rounded-sm"></span>
-              <h1 className="font-display text-xl font-bold text-[#E8E6DF] tracking-wider uppercase">
-                TrainSync
-              </h1>
+              <span className="w-2.5 h-2.5 bg-[#2563EB] rounded-full"></span>
+              <span className="font-bold text-base text-[#0F172A] tracking-tight">TrainSync</span>
             </div>
-
-            <div className="h-4 w-px bg-[#28323E]"></div>
-            <p className="text-xs text-[#9E9E96] font-mono hidden sm:block">
-              Muttom Depot • Dispatch Control & Fleet Induction
-            </p>
+            <span className="text-[#E4E7EC]">|</span>
+            <span className="text-xs text-[#64748B] font-medium hidden sm:inline">Fleet Induction & Dispatch</span>
           </div>
 
-          {/* Date Selector & Operational Actions */}
+          {/* Date Picker & Action */}
           <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2 bg-[#0C1116] border border-[#28323E] rounded px-3 py-1.5 text-xs font-mono">
-              <span className="text-[#9E9E96]">Target Date:</span>
+            <div className="flex items-center space-x-2 bg-[#F7F8FA] border border-[#E4E7EC] rounded-md px-3 py-1.5 text-xs text-[#64748B]">
+              <span>Date:</span>
               <input
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="bg-transparent text-[#E8E6DF] font-bold focus:outline-none cursor-pointer"
+                className="bg-transparent text-[#0F172A] font-semibold focus:outline-none cursor-pointer"
               />
             </div>
 
             <button
               onClick={onRegenerate}
               disabled={isRegenerating}
-              className="bg-[#1C242D] hover:bg-[#28323E] text-[#E8E6DF] text-xs font-mono font-bold px-3 py-1.5 rounded border border-[#28323E] transition disabled:opacity-50"
+              className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold px-3 py-1.5 rounded-md transition disabled:opacity-50"
             >
-              {isRegenerating ? 'RUNNING OPTIMIZER...' : 'RE-RUN ENGINE'}
+              {isRegenerating ? 'Running...' : 'Re-run Engine'}
             </button>
           </div>
         </div>
 
-        {/* Dispatch Navigation Bar */}
-        <nav className="flex space-x-1 border-t border-[#28323E]/60 pt-1">
+        {/* Nav Tabs */}
+        <nav className="flex space-x-6 border-t border-[#E4E7EC]/60 pt-1">
           {[
             { id: 'plan', label: 'Daily Induction Plan' },
             { id: 'simulator', label: 'What-If Simulator' },
-            { id: 'analytics', label: 'Fleet Telemetry & SLAs' },
-            { id: 'audit', label: 'Audit Log & Overrides' }
+            { id: 'analytics', label: 'Fleet Analytics' },
+            { id: 'audit', label: 'Audit Log' }
           ].map((tab) => {
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 text-xs font-mono font-semibold rounded-t transition-all ${
+                className={`py-2 text-xs font-medium transition-all ${
                   isActive
-                    ? 'bg-[#0C1116] text-[#5B8FB0] border-t-2 border-[#5B8FB0]'
-                    : 'text-[#9E9E96] hover:text-[#E8E6DF] hover:bg-[#0C1116]/40'
+                    ? 'text-[#0F172A] border-b-2 border-[#2563EB] font-semibold'
+                    : 'text-[#64748B] hover:text-[#0F172A]'
                 }`}
               >
                 {tab.label}

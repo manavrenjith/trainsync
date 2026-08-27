@@ -25,51 +25,47 @@ export default function OverrideModal({ decision, onClose, onSubmitOverride, isS
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-black/80 flex items-center justify-center p-4">
-      <div className="w-full max-w-lg bg-[#141B22] border border-[#28323E] rounded shadow-2xl overflow-hidden font-sans">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-black/40 flex items-center justify-center p-4 font-sans">
+      <div className="w-full max-w-lg bg-white border border-[#E4E7EC] rounded-md shadow-lg overflow-hidden">
         {/* Header */}
-        <div className="p-4 border-b border-[#28323E] flex items-center justify-between bg-[#0C1116]">
+        <div className="p-4 border-b border-[#E4E7EC] flex items-center justify-between bg-[#F7F8FA]">
           <div>
-            <h3 className="font-display text-base font-bold text-[#E8E6DF]">Supervisor Decision Override</h3>
-            <p className="text-xs font-mono text-[#9E9E96]">Train Target: <span className="text-[#E8E6DF] font-bold">{decision.train_id}</span></p>
+            <h3 className="text-sm font-semibold text-[#0F172A]">Supervisor Decision Override</h3>
+            <p className="text-xs text-[#64748B]">Target Train: <span className="font-mono font-semibold text-[#0F172A]">{decision.train_id}</span></p>
           </div>
-          <button onClick={onClose} className="text-[#9E9E96] hover:text-[#E8E6DF] font-mono text-xs">
-            [ESC]
+          <button onClick={onClose} className="text-[#64748B] hover:text-[#0F172A] text-xs font-mono">
+            [Close]
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
           {error && (
-            <div className="p-3 bg-[#1C1214] border border-[#C4433A]/50 rounded text-xs text-[#C4433A] font-mono">
+            <div className="p-3 bg-[#F7F8FA] border border-[#DC2626]/30 rounded text-[#DC2626]">
               {error}
             </div>
           )}
 
           {/* Current Decision */}
-          <div className="bg-[#0C1116] p-3 rounded border border-[#28323E] flex items-center justify-between text-xs font-mono">
-            <span className="text-[#9E9E96]">System Proposed State:</span>
-            <span className="font-bold text-[#E8E6DF] px-2 py-0.5 bg-[#1C242D] rounded">{decision.decision}</span>
+          <div className="bg-[#F7F8FA] p-3 rounded border border-[#E4E7EC] flex items-center justify-between">
+            <span className="text-[#64748B]">System Proposed State:</span>
+            <span className="font-semibold text-[#0F172A]">{decision.decision}</span>
           </div>
 
           {/* New Decision Selector */}
-          <div className="space-y-2">
-            <label className="text-xs font-mono font-bold text-[#E8E6DF] uppercase block">
-              New Target Decision State:
+          <div className="space-y-1.5">
+            <label className="font-semibold text-[#0F172A] block">
+              New Target State:
             </label>
-            <div className="grid grid-cols-3 gap-2 font-mono text-xs">
+            <div className="grid grid-cols-3 gap-2">
               {['INDUCT', 'STANDBY', 'IBL'].map(opt => (
                 <button
                   type="button"
                   key={opt}
                   onClick={() => setNewDecision(opt)}
-                  className={`py-2 px-3 rounded font-bold transition border ${
+                  className={`py-2 px-3 rounded font-medium transition border text-xs ${
                     newDecision === opt
-                      ? opt === 'INDUCT'
-                        ? 'bg-[#121E15] text-[#3FA34D] border-[#3FA34D]'
-                        : opt === 'STANDBY'
-                        ? 'bg-[#221B10] text-[#E0A526] border-[#E0A526]'
-                        : 'bg-[#1C1214] text-[#C4433A] border-[#C4433A]'
-                      : 'bg-[#0C1116] text-[#9E9E96] border-[#28323E] hover:bg-[#1C242D]'
+                      ? 'bg-[#2563EB] text-white border-[#2563EB]'
+                      : 'bg-white text-[#64748B] border-[#E4E7EC] hover:bg-[#F7F8FA]'
                   }`}
                 >
                   {opt}
@@ -78,43 +74,43 @@ export default function OverrideModal({ decision, onClose, onSubmitOverride, isS
             </div>
           </div>
 
-          {/* Supervisor Identity */}
+          {/* Supervisor Name */}
           <div className="space-y-1">
-            <label className="text-xs font-mono text-[#9E9E96] block">Supervisor Identity / Role:</label>
+            <label className="text-[#64748B] block">Supervisor Identity / Role:</label>
             <input
               type="text"
               value={supervisorName}
               onChange={(e) => setSupervisorName(e.target.value)}
-              className="w-full bg-[#0C1116] border border-[#28323E] rounded px-3 py-1.5 text-xs font-mono text-[#E8E6DF] focus:outline-none focus:border-[#5B8FB0]"
+              className="w-full bg-white border border-[#E4E7EC] rounded px-3 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:border-[#2563EB]"
               required
             />
           </div>
 
-          {/* Override Reason */}
+          {/* Reason */}
           <div className="space-y-1">
-            <label className="text-xs font-mono text-[#9E9E96] block">Audited Rationale (Mandatory):</label>
+            <label className="text-[#64748B] block">Audited Rationale (Mandatory):</label>
             <textarea
               rows={3}
               placeholder="State explicit operational rationale for overriding decision..."
               value={overrideReason}
               onChange={(e) => setOverrideReason(e.target.value)}
-              className="w-full bg-[#0C1116] border border-[#28323E] rounded p-2.5 text-xs font-sans text-[#E8E6DF] placeholder-[#9E9E96] focus:outline-none focus:border-[#5B8FB0]"
+              className="w-full bg-white border border-[#E4E7EC] rounded p-2.5 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:border-[#2563EB]"
               required
             />
           </div>
 
-          <div className="pt-3 border-t border-[#28323E] flex items-center justify-end space-x-2 font-mono text-xs">
+          <div className="pt-3 border-t border-[#E4E7EC] flex items-center justify-end space-x-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 text-[#9E9E96] hover:text-[#E8E6DF]"
+              className="px-3 py-1.5 text-[#64748B] hover:text-[#0F172A]"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-1.5 font-bold bg-[#5B8FB0] text-[#0C1116] hover:bg-[#5B8FB0]/90 rounded transition disabled:opacity-50"
+              className="px-4 py-1.5 font-medium bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded transition disabled:opacity-50"
             >
               {isSubmitting ? 'Saving...' : 'Commit Override'}
             </button>
