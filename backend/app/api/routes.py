@@ -34,9 +34,11 @@ from app.schemas import (
     WhatIfResponse,
     DecisionEnum,
     DepartmentEnum,
-    SeverityEnum
+    SeverityEnum,
+    CPSATOptimizationResultSchema
 )
 from app.engine.optimizer import optimize_induction_plan
+from app.engine.cpsat_stabling_solver import solve_stabling_and_departure_schedule
 from app.config import TARGET_INDUCTION_COUNT, TARGET_STANDBY_COUNT
 
 router = APIRouter(prefix="/api")
@@ -200,6 +202,21 @@ def get_induction_plan(eval_date: date, db: Session = Depends(get_db)):
         )
         for d in decisions_db
     ]
+
+
+@router.get("/plan/{eval_date}/cpsat-stabling", response_model=CPSATOptimizationResultSchema)
+def get_cpsat_stabling_optimization(eval_date: date, db: Session = Depends(get_db)):
+    """Runs Phase-2 Google OR-Tools CP-SAT solver for stabling placement & turnout departure timetable."""
+    decisions = get_induction_plan(eval_date, db)
+    bays_db = db.query(StablingBayDB).all()
+    bays = [
+        StablingBaySchema(
+            id=b.id, bay_id=b.bay_id, track_name=b.track_name,
+            position_order=b.position_order, occupying_train_id=b.occupying_train_id,
+            blocked_by_train_ids=b.blocked_by_train_ids or []
+        ) for b in bays_db
+    ]
+    return solve_stabling_and_departure_schedule(decisions, bays, eval_date)
 
 
 @router.post("/plan/{eval_date}/generate", response_model=List[InductionDecisionSchema])

@@ -124,3 +124,23 @@ class WhatIfResponse(BaseModel):
     simulated_plan: List[InductionDecisionSchema]
     changes_count: int
     diff_summary: List[str]
+
+class CPSATStablingAssignmentSchema(BaseModel):
+    train_id: str
+    decision: DecisionEnum
+    track_name: str
+    position_order: int
+    scheduled_departure_time: str
+    requires_shunting: bool
+    shunting_blockers: List[str] = Field(default_factory=list)
+    bay_id: str
+
+class CPSATOptimizationResultSchema(BaseModel):
+    eval_date: date
+    solver_status: str  # OPTIMAL, FEASIBLE, HEURISTIC_FALLBACK
+    objective_value: float
+    total_shunting_moves: int
+    total_trains_scheduled: int
+    assignments: List[CPSATStablingAssignmentSchema]
+    solver_execution_ms: float
+    solver_summary: str
